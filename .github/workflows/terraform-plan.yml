@@ -1,0 +1,21 @@
+name: Terraform Plan
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform-plan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Terraform Plan
+      id: terraform-plan
+      run: |
+        terraform init
+        terraform plan -out=tfplan
+        if [ $(terraform plan -detailed-exitcode -out=tfplan | grep -c "error") -ne 0 ]; then
+          echo "Terraform plan failed with errors."
+          exit 1
+        fi
