@@ -6,8 +6,3 @@ resource "aws_vpc" "main" {
     Name = "main"
   }
 }
-
-provider "aws" {
-  
-  region = "us-east-2"
-}
