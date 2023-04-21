@@ -17,12 +17,15 @@ jobs:
       run: |
         aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
         aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+    - name: Terraform Init
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.0.6
+
     - name: Terraform Plan
-      id: terraform-plan
+      id: plan
       run: |
-        terraform init
-        terraform plan -out=tfplan
-        if [ $(terraform plan -detailed-exitcode -out=tfplan | grep -c "error") -ne 0 ]; then
-          echo "Terraform plan failed with errors."
-          exit 2
+        terraform plan -detailed-exitcode
+        if [ ${{ steps.plan.outputs.exitcode }} -ne 0 ]; then
+          exit 1
         fi
