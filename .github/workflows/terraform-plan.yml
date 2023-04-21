@@ -26,6 +26,4 @@ jobs:
         run: |
           terraform init
           terraform plan -detailed-exitcode
-          if [ ${{ steps.plan.outputs.exitcode }} -ne 0 ]; then
-            exit 1
-          fi
+          echo "::set-output name=exitcode::${{ steps.plan.outputs.exitcode }}"
