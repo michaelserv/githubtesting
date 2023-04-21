@@ -13,10 +13,12 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     steps:
     - uses: actions/checkout@v2
+
     - name: Set up AWS credentials
       run: |
         aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
         aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+
     - name: Terraform Init
       uses: hashicorp/setup-terraform@v1
       with:
@@ -25,7 +27,14 @@ jobs:
     - name: Terraform Plan
       id: plan
       run: |
-        terraform plan -detailed-exitcode
-        if [ ${{ steps.plan.outputs.exitcode }} -ne 0 ]; then
+        terraform init
+        terraform plan -detailed-exitcode -out=tfplan
+        if [ ${{ steps.plan.outputs.exitcode }} -eq 2 ]; then
+          echo "Terraform plan failed with errors."
+          exit 1
+        elif [ ${{ steps.plan.outputs.exitcode }} -eq 0 ]; then
+          echo "Terraform plan succeeded."
+        else
+          echo "Unknown exit code from terraform plan."
           exit 1
         fi
