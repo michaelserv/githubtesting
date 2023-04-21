@@ -1,29 +1,23 @@
 name: Terraform Plan
-
 on:
   push:
     branches:
       - main
-
 jobs:
   terraform:
     runs-on: ubuntu-latest
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Terraform Init
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.0.6
-
       - name: Terraform Plan
-        id: plan
+        id: terraform-plan
         run: |
           terraform init
-          terraform plan -detailed-exitcode
-          echo "::set-output name=exitcode::${{ steps.plan.outputs.exitcode }}"
+          terraform plan -out=tfplan
+          if [ $(terraform plan -detailed-exitcode -out=tfplan | grep -c "error") -ne 0 ]; then
+            echo "Terraform plan failed with errors."
+            exit 1
+          fi
